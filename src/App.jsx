@@ -21,7 +21,7 @@ function App() {
       </main>
 
       <footer className="app-footer">
-        EZTechMovie · StreamList — INT499 Course Project, Week 1
+        EZTechMovie · StreamList — INT499 Course Project
       </footer>
     </div>
   );
