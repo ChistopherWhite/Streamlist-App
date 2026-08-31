@@ -3,74 +3,105 @@
 INT499 course project. A React app for EZTechMovie, a fictional cloud-based
 streaming company.
 
-## What's here (Week 2)
+## What's here (Week 4)
 
-Building on the Week 1 shell (routing, navigation, the basic add-title form),
-this milestone makes the StreamList page fully interactive:
+This milestone is an AI-assisted code review pass rather than new
+features: the existing app was handed to an AI tool (Claude, read
+directly against the project source — the same workflow as using
+CodeGPT or Copilot Chat in VS Code) to find real problems in the
+components, and the findings were reviewed and selectively acted on.
 
-- **Every submitted title is displayed on the page** as a "ticket" card, not
-  just logged to the console.
-- **Edit, delete, and mark-complete** on every ticket:
-  - *Complete* — a single click toggles a title between "Watching" and
-    "Watched" (dims the ticket, strikes through the title, tags it).
-  - *Edit* — turns the ticket into an inline form (title, genre, platform)
-    with Save/Cancel, so you never leave the page to fix a typo.
-  - *Delete* — asks for a one-click confirmation ("Remove? ✓ ✗") before
-    removing anything, so a stray click can't wipe out a title.
-- **Filter tabs** (All / Watching / Watched) with live counts, so the list
-  stays useful as it grows.
-- **Toast confirmations** — a small "added / updated / removed" message
-  appears after each action and clears itself after ~2.4 seconds.
-- **The add-title form still clears itself** the moment a title is accepted,
-  and the genre/platform the user last picked are preserved for the next
-  entry.
-- **Icon library installed**: [react-icons](https://react-icons.github.io/react-icons/)
-  (Phosphor + Material Design sets) replaces one-off hand-drawn SVGs for the
-  nav bar and every ticket action (edit/delete/complete/save/cancel/filter),
-  and the Google Fonts stylesheet (Bebas Neue, Inter, JetBrains Mono) from
-  Week 1 is still in place for typography.
-- **Navigation** is unchanged in structure from Week 1 — the same
-  React Router–driven menu (StreamList, Movies, Cart, About) — but the icons
-  in it now come from the installed icon library too, so the whole app pulls
-  from one consistent icon set.
+Full write-up, including what was fixed and what was intentionally
+left alone (with reasoning), is in
+[`AI_CODE_REVIEW.md`](./AI_CODE_REVIEW.md). Short version:
 
-Routes:
-- `/` — **StreamList** (home). Full add/edit/delete/complete/filter flow described above.
-- `/movies` — **Movies**. Placeholder — content arrives in Week 4.
-- `/cart` — **Cart**. Placeholder — content arrives in Week 4.
-- `/about` — **About**. Placeholder — content arrives in Week 5.
+- **Fixed:** a race condition in the Movies page's debounced search
+  that could let stale results reappear after the search box was
+  cleared.
+- **Fixed:** a suppressed React Hook lint warning in `MoviesPage`,
+  resolved properly with `useCallback` instead of silencing it.
+- **Fixed:** missing form labels and no Enter-to-save support on the
+  inline ticket-edit form in `TicketCard`.
+- **Reviewed, not changed:** lifting shared state into Context,
+  syncing `localStorage` across browser tabs, and memoizing
+  `TicketCard` — each flagged by the review but consciously skipped as
+  premature for the app's current scope, with reasoning documented.
 
-## Project structure
+Speaker notes for the required video presentation — covering the
+review process, what was implemented vs. skipped and why, and a
+reflection on using AI for testing — are in
+[`AI_TESTING_SPEAKER_NOTES.md`](./AI_TESTING_SPEAKER_NOTES.md).
 
-```
-streamlist/
-├─ index.html
-├─ src/
-│  ├─ main.jsx           # entry point, wraps App in BrowserRouter
-│  ├─ App.jsx             # route definitions + shared layout
-│  ├─ index.css           # all styling (design tokens at the top)
-│  ├─ components/
-│  │  ├─ Navbar.jsx       # top nav, react-icons, active-link highlighting
-│  │  ├─ ComingSoon.jsx   # shared placeholder for Movies/Cart/About
-│  │  └─ Icons.jsx        # legacy inline SVG set (still used by ComingSoon)
-│  └─ pages/
-│     ├─ StreamListPage.jsx   # add / edit / delete / complete / filter / toast
-│     ├─ MoviesPage.jsx
-│     ├─ CartPage.jsx
-│     └─ AboutPage.jsx
-└─ package.json
-```
+## What's here (Week 3)
 
-## Run it locally
+This milestone adds a real external API and fixes the app's biggest
+usability gap from the first two weeks: a page refresh used to wipe out
+everything the user had added.
 
-Requires Node.js 18+.
+### TMDB API integration
+- New **Movies** page (`/movies`) is now fully built out, searching
+  [The Movie Database](https://www.themoviedb.org/) (TMDB) instead of
+  showing a placeholder.
+- Search is debounced (fires ~400ms after you stop typing) and also
+  works via a Search button / Enter key.
+- Each result shows poster, title, release year, TMDB rating, a genre
+  tag, and a trimmed synopsis, pulled straight from TMDB's
+  `/search/movie` endpoint.
+- An **"Add to StreamList"** button on every result adds that movie to
+  the same list the StreamList home page reads from — so a title found
+  through search shows up back home immediately, tagged `TMDB` as its
+  platform. Titles already on the list show "On your list" and can't be
+  added twice.
+- If no TMDB API key is configured, the page shows setup instructions
+  instead of a broken screen (see **Setup** below).
 
-```bash
-npm install
-npm run dev
-```
+### localStorage persistence
+- Every StreamList item (added manually or from TMDB) is now saved to
+  `localStorage` the moment it changes — adds, edits, deletes, and
+  watched/watching toggles are all persisted immediately.
+- Refreshing the page, or closing and reopening the tab, restores the
+  full list exactly as it was.
 
-Then open the URL Vite prints (usually `http://localhost:5173`).
+### Code reconstruction for consistency
+This week's refactor centralizes logic that used to live only inside
+`StreamListPage`, so the new Movies page doesn't duplicate it:
+- **`src/hooks/useLocalStorage.js`** — a generic `useState`-plus-persistence
+  hook.
+- **`src/hooks/useStreamListItems.js`** — the single source of truth for
+  the StreamList data: `addItem`, `updateItem`, `removeItem`,
+  `toggleComplete`, and duplicate-checking (`hasTmdbId`). Both
+  `StreamListPage` and `MoviesPage` call this same hook, so there's
+  exactly one place that knows how an item is shaped and stored.
+- **`src/lib/constants.js`** — genres, platforms, filters, and the TMDB
+  genre-id-to-label map, previously duplicated inline.
+- **`src/components/TicketCard.jsx`** — the ticket UI extracted out of
+  `StreamListPage` into its own component.
+
+## Setup
+
+Requires Node.js 18+ and a free TMDB account.
+
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+2. Get a free TMDB API key at
+   [themoviedb.org/settings/api](https://www.themoviedb.org/settings/api).
+3. Copy `.env.example` to `.env` and paste in your key:
+   ```bash
+   cp .env.example .env
+   ```
+   ```
+   VITE_TMDB_API_KEY=your_key_here
+   ```
+   `.env` is gitignored — your key is never committed.
+4. Run the dev server:
+   ```bash
+   npm run dev
+   ```
+
+Without a key, the app still runs; the Movies page just shows setup
+instructions instead of search results.
 
 To build a production bundle:
 
@@ -79,25 +110,41 @@ npm run build
 npm run preview
 ```
 
-## State variables in StreamListPage
+## Routes
 
-| State | Holds |
-|---|---|
-| `form` | the controlled add-title form (title, genre, platform) |
-| `items` | the master list of everything the user has added |
-| `error` | validation message shown when the title field is empty |
-| `editingId` | id of the ticket currently in edit mode, or `null` |
-| `editDraft` | the in-progress values for whichever ticket is being edited |
-| `pendingDeleteId` | id of the ticket showing the "remove this?" confirm step |
-| `filter` | which subset of items (`all` / `watching` / `watched`) is shown |
-| `toast` | the short-lived confirmation message shown after an action |
+- `/` — **StreamList** (home). Add, edit, delete, mark-complete, and
+  filter titles. Fully persisted to `localStorage`.
+- `/movies` — **Movies**. Search TMDB and add results to your list.
+- `/cart` — **Cart**. Placeholder — content arrives in Week 4.
+- `/about` — **About**. Placeholder — content arrives in Week 5.
 
-## Notes for grading / next weeks
+## Project structure
 
-- State for the StreamList still lives inside `StreamListPage.jsx`. As
-  Movies and Cart get built out in Week 4, this will likely move up into
-  `App.jsx` (or context) so items can be shared across pages, e.g. adding a
-  movie to the cart.
-- Movies, Cart, and About are intentionally empty per the assignment —
-  each renders a `ComingSoon` placeholder that names the week it'll be built.
+```
+streamlist/
+├─ .env.example           # documents the required TMDB env var (not the real key)
+├─ index.html
+├─ VIDEO_SCRIPT.md         # walkthrough script/shot list for the video presentation
+├─ src/
+│  ├─ main.jsx             # entry point, wraps App in BrowserRouter
+│  ├─ App.jsx              # route definitions + shared layout
+│  ├─ index.css            # all styling (design tokens at the top)
+│  ├─ hooks/
+│  │  ├─ useLocalStorage.js     # generic persisted-state hook
+│  │  └─ useStreamListItems.js  # shared CRUD logic for the StreamList data
+│  ├─ lib/
+│  │  ├─ tmdb.js            # TMDB fetch wrapper (search, image URLs)
+│  │  └─ constants.js       # genres, platforms, filters, TMDB genre map
+│  ├─ components/
+│  │  ├─ Navbar.jsx         # top nav, react-icons, active-link highlighting
+│  │  ├─ TicketCard.jsx     # a single StreamList entry (view + inline edit)
+│  │  ├─ ComingSoon.jsx     # shared placeholder for Cart/About
+│  │  └─ Icons.jsx          # legacy inline SVG set (still used by ComingSoon)
+│  └─ pages/
+│     ├─ StreamListPage.jsx # add/edit/delete/complete/filter, backed by the shared hook
+│     ├─ MoviesPage.jsx     # TMDB search + "Add to StreamList"
+│     ├─ CartPage.jsx
+│     └─ AboutPage.jsx
+└─ package.json
+```
 
