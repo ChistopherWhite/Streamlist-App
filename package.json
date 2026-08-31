@@ -2,7 +2,7 @@
   "name": "streamlist",
   "private": true,
   "version": "0.1.0",
-  "description": "StreamList - EZTechMovie course project (INT499, Week 2)",
+  "description": "StreamList - EZTechMovie course project (INT499, Week 4)",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -18,5 +18,8 @@
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.1",
     "vite": "^5.4.6"
+  },
+  "allowScripts": {
+    "esbuild@0.21.5": true
   }
 }
