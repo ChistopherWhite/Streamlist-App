@@ -172,7 +172,6 @@ npm run preview
 streamlist/
 ├─ .env.example           # documents the required TMDB env var (not the real key)
 ├─ index.html
-├─ VIDEO_SCRIPT.md         # walkthrough script/shot list for the video presentation
 ├─ src/
 │  ├─ main.jsx             # entry point, wraps App in BrowserRouter
 │  ├─ App.jsx              # route definitions + shared layout
