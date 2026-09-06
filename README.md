@@ -3,6 +3,54 @@
 INT499 course project. A React app for EZTechMovie, a fictional cloud-based
 streaming company.
 
+## What's here (Week 5 — Final Release)
+
+The final milestone: StreamList is now an installable Progressive Web
+App, and the About page has real content instead of a placeholder.
+
+### PWA: installable on desktop and mobile
+- **`public/manifest.webmanifest`** — app name, icons (192/512, plus
+  maskable variants), theme colors, and standalone display mode, so an
+  installed StreamList looks and feels like a native app rather than a
+  browser tab.
+- **`public/sw.js`** — a hand-written service worker (no build plugin)
+  that pre-caches the app shell on install, serves same-origin assets
+  cache-first with the network filling in the cache as you browse, and
+  explicitly bypasses caching for TMDB requests so search results and
+  posters are never served stale.
+- **`public/icons/`** — a full icon set generated for this app,
+  including maskable versions for Android's adaptive-icon masking.
+- Registered in `src/registerServiceWorker.js`, called from
+  `main.jsx`, and gated to production builds only (a live-caching
+  service worker fights with Vite's dev-mode hot reload, so it's
+  skipped under `npm run dev`).
+
+**To test installability:** run `npm run build && npm run preview`,
+open the app in Chrome or Edge, and look for the install icon in the
+address bar (or DevTools → Application → Manifest to inspect it
+directly). It won't appear under `npm run dev` — installability checks
+require the production build.
+
+### About page — finished, not a placeholder
+Real content: the five-week project story, a "what we care about"
+values section, a team roster, and the tech stack. Cart remains a
+placeholder by design (see below) — its wording was also updated so it
+no longer references a specific week that's already passed.
+
+### Final scope
+- `/` — StreamList: add, edit, delete, complete, filter — persisted to `localStorage`.
+- `/movies` — TMDB search, add results straight to your list.
+- `/about` — company story, values, team, tech stack.
+- `/cart` — intentionally still a placeholder; scoped as future work, not part of this build.
+
+### Presentation
+The final management-facing presentation —
+`StreamList-Executive-Presentation.pptx` — covers the full Week 1–5
+build for a non-technical audience, with speaker notes on every slide
+(visible in PowerPoint's Presenter View) and a dedicated cue slide for
+switching to a live demo of the running app. It's delivered alongside
+this code, not inside this zip.
+
 ## What's here (Week 4)
 
 This milestone is an AI-assisted code review pass rather than new
@@ -147,4 +195,3 @@ streamlist/
 │     └─ AboutPage.jsx
 └─ package.json
 ```
-
