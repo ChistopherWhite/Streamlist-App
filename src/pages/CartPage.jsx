@@ -13,8 +13,8 @@ function CartPage() {
       </div>
       <ComingSoon
         title="Nothing in the cart — by design"
-        week={4}
-        description="This page intentionally ships without data in Week 1. Cart items, quantities, and checkout will be built out in Week 4."
+        tag="Planned for a future release"
+        description="Cart, rentals, and checkout are scoped as a future release beyond this five-week build. The rest of the app — StreamList, Movies/TMDB search, and About — is complete."
         icon={CartIcon}
       />
     </>
