@@ -43,13 +43,6 @@ no longer references a specific week that's already passed.
 - `/about` — company story, values, team, tech stack.
 - `/cart` — intentionally still a placeholder; scoped as future work, not part of this build.
 
-### Presentation
-The final management-facing presentation —
-`StreamList-Executive-Presentation.pptx` — covers the full Week 1–5
-build for a non-technical audience, with speaker notes on every slide
-(visible in PowerPoint's Presenter View) and a dedicated cue slide for
-switching to a live demo of the running app. It's delivered alongside
-this code, not inside this zip.
 
 ## What's here (Week 4)
 
@@ -59,9 +52,6 @@ directly against the project source — the same workflow as using
 CodeGPT or Copilot Chat in VS Code) to find real problems in the
 components, and the findings were reviewed and selectively acted on.
 
-Full write-up, including what was fixed and what was intentionally
-left alone (with reasoning), is in
-[`AI_CODE_REVIEW.md`](./AI_CODE_REVIEW.md). Short version:
 
 - **Fixed:** a race condition in the Movies page's debounced search
   that could let stale results reappear after the search box was
@@ -75,10 +65,6 @@ left alone (with reasoning), is in
   `TicketCard` — each flagged by the review but consciously skipped as
   premature for the app's current scope, with reasoning documented.
 
-Speaker notes for the required video presentation — covering the
-review process, what was implemented vs. skipped and why, and a
-reflection on using AI for testing — are in
-[`AI_TESTING_SPEAKER_NOTES.md`](./AI_TESTING_SPEAKER_NOTES.md).
 
 ## What's here (Week 3)
 
@@ -172,6 +158,7 @@ npm run preview
 streamlist/
 ├─ .env.example           # documents the required TMDB env var (not the real key)
 ├─ index.html
+├─ VIDEO_SCRIPT.md         # walkthrough script/shot list for the video presentation
 ├─ src/
 │  ├─ main.jsx             # entry point, wraps App in BrowserRouter
 │  ├─ App.jsx              # route definitions + shared layout
